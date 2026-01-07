@@ -1,0 +1,42 @@
+# --------------------
+# Virtual Environment
+# --------------------
+venv/
+.env
+
+# --------------------
+# Python cache files
+# --------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --------------------
+# Flask specific
+# --------------------
+instance/
+*.db
+*.sqlite3
+
+# --------------------
+# Migrations cache
+# --------------------
+migrations/__pycache__/
+
+# --------------------
+# Logs
+# --------------------
+*.log
+
+# --------------------
+# OS / Editor files
+# --------------------
+.DS_Store
+.vscode/
+.idea/
+
+# --------------------
+# Uploads (agar user files hain)
+# --------------------
+app/static/uploads/

@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  :root {
+    --glass-bg: #ffffff;
+    --primary-gradient: -gradient(135deg, #10b981 0%, #059669 100%);
+    --income-main: #10b981;
+    --expense-main: #f43f5e;
+  }
+
+  body { background-color: #f1f5f9; }
+
+  /* Upgraded Filter UI */
+  .filter-bar {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    border: 1px solid #e2f0e7;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .soft-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    border: 1px solid #e2f0e8;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    height: 100%;
+  }
+
+  .form-control, .form-select {
+    border: 1px solid #e2f0e4;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+    border-radius: 0.5rem;
+  }
+  /* Change focus glow to green */
+  .form-control:focus, .form-select:focus {
+  border-color: #10b981; /* Matches your --income-main color */
+  box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25); /* Green glow */
+  outline: 0;
+  }
+  .btn-filter {
+    background: #f8fcf9;
+    border: 1px solid #e2e8f0;
+    color: #47694a;
+    font-weight: 600;
+  }
+
+  .btn-filter.active {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 220px;
+    margin-bottom: 1rem;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+  }
+</style>
+
+<div class="container py-4">
+  
+  <div class="filter-bar mb-4">
+    <form method="GET" class="row g-3 align-items-center">
+      <div class="col-md-4">
+        <h5 class="fw-bold text-success text-uppercase mb-0">Analytics Dashboard</h5>
+        <p class="text-muted small mb-0">
+          Period: {{ datetime.strptime(selected_month|string, "%m").strftime("%B") }} {{ selected_year }}
+        </p>
+      </div>
+      <div class="col-md-8">
+        <div class="d-flex gap-2 justify-content-md-end">
+          <div class="input-group" style="max-width: 200px;">
+            <span class="input-group-text bg-white border-end-0 text-muted small">Month</span>
+            <select name="month" class="form-select border-start-0">
+              {% for m in range(1, 13) %}
+                <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ datetime.strptime(m|string, "%m").strftime("%B") }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="input-group" style="max-width: 150px;">
+            <span class="input-group-text bg-white border-end-0 text-muted small">Year</span>
+            <select name="year" class="form-select border-start-0">
+              {# Generate years from 2024 up to the current year #}
+              {% set current_year = datetime.today().year %}
+              {% for y in range(2024, current_year + 1) %}
+                <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+              {% endfor %}            
+            </select>
+          </div>
+          <button type="submit" class="btn btn-success px-4 rounded-3">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="soft-card p-4">
+        <h6 class="fw-bold mb-4">Add Record</h6>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="small fw-bold text-muted mb-1">DATE</label>
+            <input type="date" name="date" class="form-control" value="{{ datetime.today().strftime('%Y-%m-%d') }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="small fw-bold text-muted mb-1">TRANSACTION TYPE</label>
+            <select name="transaction_type" id="typeSelect" class="form-select" required>
+              <option value="Expense">Expense (Out)</option>
+              <option value="Income">Income (In)</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="small fw-bold text-muted mb-1">CATEGORY</label>
+            <select name="category" id="categorySelect" class="form-select" required></select>
+          </div>
+          <div class="mb-3">
+            <label class="small fw-bold text-muted mb-1">AMOUNT (₹)</label>
+            <input type="number" step="0.01" name="amount" class="form-control" placeholder="0.00" required>
+          </div>
+          <div class="mb-4">
+            <label class="small fw-bold text-muted mb-1">DESCRIPTION</label>
+            <textarea name="description" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+          </div>
+          <button class="btn btn-success w-100 py-2 fw-bold rounded-3">Save Entry</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="soft-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-bold mb-0 text-success">Income Streams</h6>
+              <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div class="chart-container">
+              <canvas id="incomeChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="soft-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-bold mb-0 text-danger">Expense Breakdown</h6>
+              <i class="bi bi-graph-down-arrow"></i>
+            </div>
+            <div class="chart-container">
+              <canvas id="expenseChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="soft-card overflow-hidden">
+            <div class="p-4 border-bottom d-flex justify-content-between">
+              <h6 class="fw-bold text-success mb-0">Transaction History</h6>
+              <span class="text-muted small">{{ expenses|length }} entries this month</span>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4">Date</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for e in expenses %}
+                  <tr>
+                    <td class="ps-4">
+                      <div class="small fw-bold">{{ e.date.strftime("%d %b") }}</div>
+                      <div class="text-muted" style="font-size: 0.75rem;">{{ e.description or 'No note' }}</div>
+                    </td>
+                    <td>
+                      <span class="badge {% if e.transaction_type == 'Income' %}bg-success{% else %}bg-danger{% endif %} bg-opacity-10 {% if e.transaction_type == 'Income' %}text-success{% else %}text-danger{% endif %} border">
+                        {{ e.category }}
+                      </span>
+                    </td>
+                    <td class="fw-bold {% if e.transaction_type == 'Income' %}text-success{% else %}text-danger{% endif %}">
+                      {{ '+' if e.transaction_type == 'Income' else '-' }}₹{{ "{:,.0f}".format(e.amount) }}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 1. DYNAMIC CATEGORIES
+  const categoryMap = {
+    'Expense': ['Stock', 'Rent', 'Staff', 'Marketing', 'Misc'],
+    'Income': ['Consultation', 'Medicine Sale', 'Lab Fees', 'Other']
+  };
+
+  const typeSelect = document.getElementById('typeSelect');
+  const catSelect = document.getElementById('categorySelect');
+
+  function updateCategories() {
+    const val = typeSelect.value;
+    catSelect.innerHTML = '';
+    categoryMap[val].forEach(c => {
+      let opt = document.createElement('option');
+      opt.value = c; opt.innerHTML = c;
+      catSelect.appendChild(opt);
+    });
+  }
+  typeSelect.addEventListener('change', updateCategories);
+  updateCategories();
+
+  // 2. SEPARATE CHARTS
+  const chartOptions = {
+    maintainAspectRatio: false,
+    cutout: '75%',
+    plugins: {
+      legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 } } }
+    }
+  };
+
+  // Income Chart
+  const incomeCtx = document.getElementById('incomeChart').getContext('2d');
+  new Chart(incomeCtx, {
+    type: 'doughnut',
+    data: {
+      labels: {{ income_labels|tojson }},
+      datasets: [{
+        data: {{ income_values|tojson }},
+        backgroundColor: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0'],
+        borderWidth: 2
+      }]
+    },
+    options: chartOptions
+  });
+
+  // Expense Chart
+  const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+  new Chart(expenseCtx, {
+    type: 'doughnut',
+    data: {
+      labels: {{ expense_labels|tojson }},
+      datasets: [{
+        data: {{ expense_values|tojson }},
+        backgroundColor: ['#f43f5e', '#fb7185', '#fda4af', '#fecdd3'],
+        borderWidth: 2
+      }]
+    },
+    options: chartOptions
+  });
+</script>
+
+{% endblock %}

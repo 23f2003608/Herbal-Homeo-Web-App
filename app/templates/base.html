@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Herbal Homeo Doctor Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CSS ENHANCEMENTS */
+    body {
+      background-color: #f1f9f5;
+      background-image: 
+          radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 50%), 
+  radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.1) 0px, transparent 50%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .navbar {
+      background: rgba(255, 255, 255, 0.8) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 0.7rem 0;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #006d0f !important;
+    }
+
+    /* Modern Nav Links */
+    .nav-link {
+      color: #64748b !important;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.6rem 1.1rem !important;
+      border-radius: 0.75rem;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      margin: 0 2px;
+    }
+
+    .nav-link:hover {
+      color: #006d0f !important;
+      background: rgba(1, 119, 23, 0.06);
+    }
+
+    .nav-link.active {
+      color: #006d0f !important;
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.12);
+    }
+
+    /* Dropdown Visuals */
+    .dropdown-menu {
+      border: none;
+      border-radius: 1rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      padding: 0.5rem;
+      animation: navFadeIn 0.3s ease;
+    }
+
+    @keyframes navFadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dropdown-item {
+      border-radius: 0.5rem;
+      padding: 0.6rem 1rem;
+      font-weight: 500;
+      color: #64748b;
+      transition: all 0.2s;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(79, 70, 229, 0.08);
+      color: #006d0f;
+      transform: translateX(4px);
+    }
+
+    /* Logout Button */
+    .btn-logout {
+      background: #fff1f2;
+      color: #e11d48;
+      border: 1px solid #ffe4e6;
+      font-weight: 700;
+      padding: 0.6rem 1.3rem;
+      border-radius: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: #e11d48;
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);
+    }
+</style>
+
+{% if not hide_navbar %}
+<nav class="navbar navbar-expand-lg sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('dashboard.doctor_dashboard') }}">
+      <!-- <div class="bg-primary bg-opacity-10 p-2 rounded-3 d-inline-flex"> -->
+        <!-- <i class="bi bi-leaf-fill text-primary"></i> -->
+      <!-- </div> -->
+      <span><img src="static/brand.jpeg" alt="doc-img"></span>
+    </a>
+
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="bi bi-grid-3x3-gap-fill fs-3 text-primary"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'dashboard.doctor_dashboard' %}active{% endif %}" 
+               href="{{ url_for('dashboard.doctor_dashboard') }}">
+               <i class="bi bi-house-door me-1"></i> Dashboard
+            </a>
+        </li>
+         <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'patients.patients_list' %}active{% endif %}" 
+               href="{{ url_for('patients.patients_list') }}">
+               <i class="bi bi-list-ul me-1"></i> All Patients / History
+            </a>
+        </li> <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'patients.new_appointment' %}active{% endif %}" 
+               href="{{ url_for('patients.new_appointment') }}">
+               <i class="bi bi-plus-circle me-1"></i> New Appointment
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'expenses.manage_expenses' %}active{% endif %}" 
+               href="{{ url_for('expenses.manage_expenses') }}">
+               <i class="bi bi-wallet2 me-1"></i> Expenses
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'notices.manage_notices' %}active{% endif %}" 
+               href="{{ url_for('notices.manage_notices') }}">
+               <i class="bi bi-info-circle-fill"></i>Testimonials
+            </a>
+        </li>
+      </ul>
+
+      <div class="d-flex align-items-center gap-3">
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-logout d-flex align-items-center">
+          <i class="bi bi-power me-2"></i> Logout
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container mt-3">
+      {% for category, msg in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

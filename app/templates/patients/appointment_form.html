@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.95);
+  --primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+
+  body { background-color: #f1f9f5; }
+
+  .soft-card {
+    background: var(--glass-bg);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  }
+
+  .section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #006d0f;
+    margin-top: 2rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .section-title::after {
+    content: ""; flex: 1; height: 1px; background: #e2f0e6; margin-left: 1rem;
+  }
+
+  .form-label { font-weight: 600; font-size: 0.85rem; color: #47694a; margin-bottom: 0.4rem; }
+
+  .form-control, .form-select {
+    border-radius: 0.75rem;
+    padding: 0.625rem 1rem;
+    border: 1px solid #e2f0e8;
+    background-color: #fcfdfc;
+    transition: all 0.2s ease;
+  }
+
+  .form-control:focus {
+    box-shadow: 0 0 0 4px rgba(99, 241, 144, 0.1);
+    border-color: #006d0f;
+  }
+
+  .lookup-field { background-color: #f8fff9; border-color: #cbe1ce; }
+
+  .btn-save {
+    background: var(--primary-gradient);
+    color: rgb(255, 255, 255); border: none; border-radius: 0.75rem;
+    padding: 1rem; font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 15px -3px rgba(70, 229, 107, 0.3);
+  }
+
+  .btn-save:hover { transform: translateY(-2px); color: white; }
+
+  .input-group-text {
+    border-radius: 0.75rem 0 0 0.75rem;
+    background-color: #f8fcf9; border-color: #e2f0e8; color: #94b89f;
+  }
+
+  .grid-label { font-size: 0.65rem; font-weight: 700; color: #47694a; text-transform: uppercase; margin-bottom: 2px; display: block; }
+</style>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-11">
+      <div class="card soft-card">
+        <div class="card-body p-4 p-md-5">
+          <form method="POST" enctype="multipart/form-data">
+            
+            <div class="section-title" style="margin-top: 0;">
+              <i class="bi bi-person-badge me-2"></i> Patient Identity
+            </div>
+            
+            <div class="row g-3 mb-4">
+              <div class="col-md-2">
+                <label class="form-label">Patient ID</label>
+                <input type="text" name="card_id" class="form-control lookup-field fw-bold text-danger" value="{{ next_id }}" readonly>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="name" class="form-control" placeholder="Required" required>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Age *</label>
+                <input type="number" name="age" class="form-control" placeholder="Years" required>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Gender</label>
+                <select class="form-select" name="gender">
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Phone</label>
+                <input type="text" name="phone" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Address</label>
+                <input type="text" name="address" class="form-control" placeholder="Street, City, Area">
+              </div>
+            </div>
+
+            <div class="section-title">
+              <i class="bi bi-clipboard2-pulse me-2"></i> Initial Visit Details
+            </div>
+
+            <div class="row g-4">
+              <div class="col-md-6">
+                <label class="form-label">Symptoms & Chief Complaints</label>
+                <textarea name="symptoms" class="form-control" rows="4" placeholder="Describe current issues..."></textarea>
+              </div>
+              
+              <div class="col-md-7">
+                <label class="form-label">Clinical Notes</label>
+                <textarea name="notes" class="form-control" rows="2" placeholder="BP, Weight, Pulse, etc..."></textarea>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label">Upload Photo / Report</label>
+                <div class="input-group">
+                  <input type="file" name="photo" class="form-control" accept="image/*">
+                  <span class="input-group-text"><i class="bi bi-camera"></i></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-title">
+              <i class="bi bi-journal-medical me-2"></i> Case History
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Past History (Optional)</label>
+                    <textarea name="past_history" class="form-control" rows="2" placeholder="Previous illnesses, surgeries..."></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Family History (Optional)</label>
+                    <textarea name="family_history" class="form-control" rows="2" placeholder="Chronic diseases in family..."></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Personal History</label>
+                    <textarea name="personal_history" class="form-control" rows="2" placeholder="Habits, occupation, lifestyle..."></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Mental General</label>
+                    <textarea name="mental_general" class="form-control" rows="2" placeholder="Temperament, fears, emotions..."></textarea>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <i class="bi bi-activity me-2"></i> Physical Generals
+            </div>
+            <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3 mb-4">
+                {% for field in ['Appetite', 'Thirst', 'Tongue', 'Salivation', 'Taste', 'Desire', 'Aversion', 'Intolerance', 'Stool', 'Urine', 'Perspiration', 'Discharge', 'Thermal'] %}
+                <div>
+                    <label class="grid-label">{{ field }}</label>
+                    <input type="text" name="{{ field.lower().replace(' ', '_') }}" class="form-control form-control-sm">
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="section-title">
+                <i class="bi bi-droplet me-2"></i> Menstruation
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-2"><label class="grid-label">Cycle</label><input type="text" name="m_cycle" class="form-control form-control-sm"></div>
+                <div class="col-md-2"><label class="grid-label">Flow</label><input type="text" name="m_flow" class="form-control form-control-sm"></div>
+                <div class="col-md-2"><label class="grid-label">Color</label><input type="text" name="m_color" class="form-control form-control-sm"></div>
+                <div class="col-md-2"><label class="grid-label">Before/During/After</label><input type="text" name="m_timing" class="form-control form-control-sm"></div>
+                <div class="col-md-2"><label class="grid-label">Leucorrhoea</label><input type="text" name="leucorrhoea" class="form-control form-control-sm"></div>
+            </div>
+            <div class="section-title">
+                <i class="bi bi-activity me-2"></i> Modalities
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col"><label class="grid-label">Fear</label><input type="text" name="fear" class="form-control form-control-sm"></div>
+                <div class="col"><label class="grid-label">Air Pref.</label><input type="text" name="air_pref" class="form-control form-control-sm"></div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Medicines / Treatment</label>
+                <textarea name="medicines" class="form-control" rows="4" placeholder="List dosage and medicine names..."></textarea>
+            </div>
+            <div class="mt-5 pt-3 border-top">
+              <div class="row align-items-center">
+                <div class="col-md-8 text-muted mb-3 mb-md-0">
+                  <i class="bi bi-info-circle me-1"></i> Ensure all medical history is recorded before final save.
+                </div>
+                <div class="col-md-4">
+                  <button type="submit" class="btn btn-save w-100 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    Save New Patient
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

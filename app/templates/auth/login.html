@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% set hide_navbar = True %} 
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+  :root {
+    --primary-green: #10b981;
+    --dark-green: #065f46;
+    --soft-emerald: #ecfdf5;
+  }
+
+  .login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background-color: #f1f5f9;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Animated Decorative Blobs */
+  .blob {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+    filter: blur(80px);
+    z-index: 1;
+    border-radius: 50%;
+    animation: float 20s infinite alternate;
+  }
+
+  @keyframes float {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(10%, 10%) scale(1.1); }
+  }
+
+  /* Glass Card Refinement */
+  .glass-login-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 2.5rem;
+    padding: 3.5rem 2.5rem;
+    box-shadow: 
+        0 10px 15px -3px rgba(0, 0, 0, 0.05),
+        0 25px 50px -12px rgba(16, 185, 129, 0.15);
+    width: 100%;
+    max-width: 440px;
+    z-index: 10;
+    transition: transform 0.3s ease;
+  }
+
+  .brand-logo-circle {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
+    border-radius: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    box-shadow: 0 12px 20px -5px rgba(16, 185, 129, 0.4);
+    color: white;
+    font-size: 2rem;
+    transform: rotate(-5deg); /* Playful tilt */
+  }
+
+  /* Input Styling */
+  .form-label {
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: #475569;
+    margin-bottom: 0.5rem;
+  }
+
+  .input-group {
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    border: 1.5px solid #e2e8f0;
+  }
+
+  .input-group:focus-within {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+  }
+
+  .input-group-text {
+    background: white;
+    border: none;
+    color: #94a3b8;
+    padding-left: 1.25rem;
+  }
+
+  .form-control {
+    border: none;
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    background: white;
+  }
+
+  .form-control:focus {
+    box-shadow: none;
+    background: white;
+  }
+
+  /* Button Styling */
+  .btn-login {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
+    border: none;
+    border-radius: 1rem;
+    padding: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 20px -5px rgba(16, 185, 129, 0.3);
+    filter: brightness(1.1);
+  }
+
+  .btn-login:active {
+    transform: translateY(0);
+  }
+
+  /* Password Toggle Button */
+  .password-toggle {
+    border: none;
+    background: white;
+    color: #94a3b8;
+    padding-right: 1.25rem;
+  }
+</style>
+
+<div class="login-wrapper">
+  <div class="blob" style="top: -10%; left: -5%;"></div>
+  <div class="blob" style="bottom: -15%; right: -5%; background: #d1fae5; animation-delay: -5s;"></div>
+
+  <div class="glass-login-card">
+    <div class="text-center mb-5">
+      <div class="brand-logo-circle">
+        <i class="bi bi-heart-pulse-fill"></i>
+      </div>
+      <h2 class="fw-bold text-dark mb-1">Herbal Portal</h2>
+      <p class="text-muted">Precision Homeopathy Management</p>
+    </div>
+
+    <form method="POST" id="loginForm">
+      <div class="mb-4">
+        <label class="form-label">Username</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+          <input type="text" name="username" class="form-control" placeholder="Enter username" required autofocus>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">Password</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-shield-lock-fill"></i></span>
+          <input type="password" name="password" id="passwordInput" class="form-control" placeholder="••••••••" required>
+          <button class="password-toggle" type="button" onclick="togglePassword()">
+            <i class="bi bi-eye" id="toggleIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-login btn-primary w-100 text-white mb-4" id="submitBtn">
+        <span id="btnText">Login to Dashboard</span>
+        <div id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></div>
+      </button>
+
+      <div class="text-center">
+        <div class="d-flex align-items-center justify-content-center gap-2 opacity-75">
+            <span class="badge bg-success-soft text-success border border-success-subtle px-3 py-2 rounded-pill" style="font-size: 0.7rem;">
+                <i class="bi bi-patch-check-fill me-1"></i> System Verified v2.0
+            </span>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function togglePassword() {
+    const passwordInput = document.getElementById('passwordInput');
+    const toggleIcon = document.getElementById('toggleIcon');
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      toggleIcon.classList.replace('bi-eye', 'bi-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      toggleIcon.classList.replace('bi-eye-slash', 'bi-eye');
+    }
+  }
+
+  // Handle Loading State
+  document.getElementById('loginForm').onsubmit = function() {
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    btnText.classList.add('d-none');
+    btnSpinner.classList.remove('d-none');
+    submitBtn.classList.add('disabled');
+  };
+</script>
+{% endblock %}

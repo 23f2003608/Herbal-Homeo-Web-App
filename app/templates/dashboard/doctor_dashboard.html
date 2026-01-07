@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+    :root {
+        --clinic-primary: #10b981;
+        --clinic-dark: #064e3b;
+        --clinic-light: #ecfdf5;
+        --bg-main: #f9fafb;
+    }
+    body { background-color: var(--bg-main); font-family: 'Inter', sans-serif; }
+    
+    .glass-card {
+        background: white; border-radius: 1.25rem; border: 1px solid #e5e7eb;
+        padding: 1.5rem; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+    }
+    .glass-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+
+    .icon-box {
+        width: 54px; height: 54px; border-radius: 1rem;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .stat-label { color: #6b7280; font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 1.75rem; font-weight: 800; color: var(--clinic-dark); }
+</style>
+
+<div class="container-fluid py-4 px-4">
+    <div class="row align-items-center mb-4 g-3">
+        <div class="col-md-5">
+            <h2 class="fw-bold text-success text-uppercase mb-1">Clinic Analytics</h2>
+            <p class="text-muted">Overview for {{ datetime(selected_year, selected_month, 1).strftime('%B %Y') }}</p>
+        </div>
+        <div class="col-md-7">
+            <form method="GET" class="d-flex gap-2 justify-content-md-end align-items-center">
+                <select name="month" class="form-select w-auto rounded-pill border-0 shadow-sm px-4">
+                    {% for m in range(1, 13) %}
+                    <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ datetime(2000, m, 1).strftime('%B') }}</option>
+                    {% endfor %}
+                </select>
+                <select name="year" class="form-select w-auto rounded-pill border-0 shadow-sm px-4">
+                    {% for y in range(2024, datetime.now().year + 1) %}
+                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm"><i class="bi bi-filter"></i> Apply</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="glass-card">
+                <div class="icon-box bg-success bg-opacity-10 text-success mb-3"><i class="bi bi-people-fill fs-4"></i></div>
+                <div class="stat-label">Total Visits</div>
+                <div class="stat-value">{{ month_footfall }}</div>
+                <div class="text-success small fw-bold mt-2"><i class="bi bi-plus"></i> {{ today_footfall }} Today</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card">
+                <div class="icon-box bg-primary bg-opacity-10 text-primary mb-3"><i class="bi bi-wallet2 fs-4"></i></div>
+                <div class="stat-label">Total Income</div>
+                <div class="stat-value">₹{{ "{:,.0f}".format(month_income) }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card">
+                <div class="icon-box bg-danger bg-opacity-10 text-danger mb-3"><i class="bi bi-arrow-down-right-circle fs-4"></i></div>
+                <div class="stat-label">Expenses</div>
+                <div class="stat-value">₹{{ "{:,.0f}".format(month_expense) }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card border-success" style="border-width: 2px;">
+                <div class="icon-box bg-success text-white mb-3 shadow-sm"><i class="bi bi-graph-up-arrow fs-4"></i></div>
+                <div class="stat-label">Net Profit</div>
+                <div class="stat-value text-success">₹{{ "{:,.0f}".format(net_profit) }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="glass-card h-100">
+                <h6 class="fw-bold mb-4">Financial Performance Trend (6 Months)</h6>
+                <div style="height: 350px;"><canvas id="growthChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="glass-card h-100 d-flex flex-column align-items-center">
+                <h6 class="fw-bold mb-4 w-100 text-center">Retention Analysis</h6>
+                <div style="height: 250px; width: 100%;"><canvas id="retentionChart"></canvas></div>
+                <div class="mt-4 p-3 bg-light rounded-4 w-100">
+                    <div class="d-flex justify-content-between mb-2"><span>New Patients:</span><span class="fw-bold text-primary">{{ new_patients }}</span></div>
+                    <div class="d-flex justify-content-between"><span>Follow-ups:</span><span class="fw-bold text-success">{{ followups }}</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="glass-card">
+                <h6 class="fw-bold mb-4 text-center">Gender Demographics</h6>
+                <div style="height: 300px;"><canvas id="demoChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="glass-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="fw-bold mb-0">Recent Ledger Transactions</h6>
+                    <a href="{{ url_for('expenses.manage_expenses') }}" class="btn btn-sm btn-outline-success border-0 rounded-pill">Manage All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <tbody class="text-secondary">
+                            {% for e in recent_transactions %}
+                            <tr>
+                                <td class="py-3"><i class="bi bi-calendar-check me-2"></i>{{ e.date.strftime('%d %b') }}</td>
+                                <td class="py-3 fw-medium text-dark">{{ e.category }}</td>
+                                <td class="py-3 text-end fw-bold {% if e.transaction_type == 'Income' %}text-success{% else %}text-danger{% endif %}">
+                                    {{ '+' if e.transaction_type == 'Income' else '-' }}₹{{ "{:,.0f}".format(e.amount) }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="3" class="text-center py-5 text-muted">No transactions recorded for this month.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 1. Growth Trend Chart
+    new Chart(document.getElementById('growthChart'), {
+        type: 'line',
+        data: {
+            labels: {{ finance_labels|tojson }},
+            datasets: [
+                { 
+                    label: 'Income', 
+                    data: {{ income_trend|tojson }}, 
+                    borderColor: '#10b981', 
+                    backgroundColor: 'rgba(16, 185, 129, 0.05)', 
+                    fill: true, 
+                    tension: 0.4 
+                },
+                { 
+                    label: 'Expenses', 
+                    data: {{ expense_trend|tojson }}, 
+                    borderColor: '#ef4444', 
+                    borderDash: [5, 5], 
+                    tension: 0.4 
+                }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // 2. Retention Chart
+    new Chart(document.getElementById('retentionChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['New', 'Follow-up'],
+            datasets: [{
+                data: [{{ new_patients }}, {{ followups }}],
+                backgroundColor: ['#3b82f6', '#10b981'],
+                borderWidth: 0
+            }]
+        },
+        options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
+    });
+
+    // 3. Updated Demographic Chart (Including Other)
+    new Chart(document.getElementById('demoChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Male', 'Female', 'Other'],
+            datasets: [{
+                data: [{{ male_count }}, {{ female_count }}, {{ other_count }}],
+                backgroundColor: [
+                    '#3b82f6', // Blue for Male
+                    '#ec4899', // Pink for Female
+                    '#94a3b8'  // Grey for Other
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

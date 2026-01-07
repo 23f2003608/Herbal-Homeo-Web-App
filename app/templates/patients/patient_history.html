@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-indigo: #246c31;
+        --glass-bg: rgba(255, 255, 255, 0.8);
+    }
+
+    body { background-color: #f8fcf8; }
+
+    /* Timeline Line */
+    .timeline { position: relative; padding: 20px 0; }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 31px; top: 0; bottom: 0;
+        width: 3px;
+        background: linear-gradient(to bottom, #15803d 0%, #e2e8f0 100%);
+        border-radius: 10px;
+    }
+
+    .timeline-item { position: relative; margin-bottom: 40px; padding-left: 80px; }
+
+    .timeline-marker {
+        position: absolute;
+        left: 20px; top: 0;
+        width: 26px; height: 26px;
+        border-radius: 50%;
+        background: #fff;
+        border: 4px solid var(--primary-indigo);
+        z-index: 2;
+        box-shadow: 0 0 0 4px rgba(99, 241, 144, 0.1);
+    }
+
+    /* Cards */
+    .visit-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 1.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .visit-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05); }
+
+    /* Data Presentation */
+    .detail-section { border-top: 1px solid #f1f9f2; padding-top: 1.5rem; margin-top: 1.5rem; }
+    
+    .data-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: #006d0f; letter-spacing: 0.05em; display: block; margin-bottom: 2px; }
+    .data-value { font-size: 0.9rem; color: #1e3b20; font-weight: 500; }
+
+    .category-header {
+        font-size: 0.85rem; font-weight: 700; color: var(--primary-indigo);
+        background: rgba(16, 185, 129, 0.05); /* Emerald 500 at 5% */
+        padding: 6px 15px; border-radius: 8px; display: inline-block; margin-bottom: 1rem;
+    }
+
+    .med-pill {
+        background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;
+        font-weight: 600; font-size: 0.75rem; padding: 0.3rem 0.8rem; border-radius: 100px;
+    }
+
+    .patient-sidebar {
+        background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+        color: white; border-radius: 2rem; padding: 2.5rem; position: sticky; top: 20px;
+    }
+    .detail-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; }
+    .detail-value { font-size: 0.9rem; color: #1e293b; margin-bottom: 10px; }
+    .history-section { background: #f8fafc; border-radius: 1rem; padding: 1.5rem; margin-top: 1rem; border: 1px solid #f1f5f9; }
+    .img-clickable { cursor: pointer; transition: transform 0.2s; border-radius: 1rem; border: 3px solid #eee; }
+    .img-clickable:hover { transform: scale(1.02); }
+</style>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="patient-sidebar shadow-lg">
+                <div class="mb-4 d-flex justify-content-between align-items-center">
+                    <a href="{{ url_for('patients.patients_list') }}" class="btn btn-sm btn-light rounded-circle shadow-sm">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <a href="{{ url_for('patients.edit_patient', patient_id=patient.id) }}" class="btn btn-sm btn-outline-light px-3 rounded-pill border-opacity-50">
+                        Edit <i class="bi bi-pencil-square ms-1"></i>
+                    </a>
+                </div>
+
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold mb-1">{{ patient.name }}</h2>
+                    <span class="badge bg-white bg-opacity-20 px-3 py-2 rounded-pill text-dark">
+                        ID: <span class="text-danger">{{ patient.card_id }}</span> | Age: {{ patient.age }}
+                    </span>
+                </div>
+
+                <div class="mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <i class="bi bi-telephone-fill opacity-75"></i>
+                        <div>
+                            <small class="d-block opacity-75">Phone Number</small>
+                            <span class="fw-medium">{{ patient.phone }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <i class="bi bi-gender-ambiguous opacity-75"></i>
+                        <div>
+                            <small class="d-block opacity-75">Gender</small>
+                            <span class="fw-medium">{{ patient.gender or 'Not Specified' }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-geo-alt-fill opacity-75"></i>
+                        <div>
+                            <small class="d-block opacity-75">Address</small>
+                            <span class="fw-medium">{{ patient.address or 'No address provided' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-top border-white border-opacity-10 text-center">
+                    <a href="{{ url_for('patients.new_followup', patient_id=patient.id) }}" class="btn btn-success w-100 rounded-pill fw-bold">
+                        <i class="bi bi-plus-lg me-2"></i>New Follow-up
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h3 class="fw-bold text-success m-0">Treatment Timeline</h3>
+                <span class="badge bg-success rounded-pill">{{ visits|length }} Visits</span>
+            </div>
+
+            {% if visits %}
+            <div class="timeline">
+                {% for visit in visits %}
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="visit-card card border-0 shadow-sm p-4">
+                        
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">
+                                    {{ visit.visit_date.strftime('%d %b %Y') }}
+                                </h5>
+                                <small class="text-muted">{{ visit.visit_date.strftime('%I:%M %p') }}</small>
+                            </div>
+                            {% if visit.is_followup %}
+                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">Follow-up</span>
+                            {% else %}
+                                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">Initial Consultation</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-{% if visit.photo_path %}8{% else %}12{% endif %}">
+                                <label class="data-label">Presenting Symptoms</label>
+                                <p class="text-dark bg-light p-3 rounded-3 border-start border-3 border-success shadow-sm">
+                                    {{ visit.symptoms or 'No symptoms recorded' }}
+                                </p>
+                            </div>
+                            {% if visit.photo_path %}
+                            <div class="col-md-4">
+                                <label class="detail-label">Clinical Photo</label>
+                                <img src="{{ url_for('static', filename=visit.photo_path) }}" 
+                                     class="img-fluid img-clickable shadow-sm" 
+                                     onclick="openImageModal(this.src)" 
+                                     alt="Report">
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if not visit.is_followup %}
+                        <div class="detail-section">
+                            <div class="category-header"><i class="bi bi-journal-medical me-2"></i>Case History</div>
+                            <div class="row row-cols-1 row-cols-md-2 g-3">
+                                <div>
+                                    <span class="data-label">Past History</span>
+                                    <span class="data-value">{{ patient.past_history or 'None' }}</span>
+                                </div>
+                                <div>
+                                    <span class="data-label">Family History</span>
+                                    <span class="data-value">{{ patient.family_history or 'None' }}</span>
+                                </div>
+                                <div>
+                                    <span class="data-label">Personal History</span>
+                                    <span class="data-value">{{ patient.personal_history or 'None' }}</span>
+                                </div>
+                                <div>
+                                    <span class="data-label">Mental General</span>
+                                    <span class="data-value">{{ patient.mental_general or 'None' }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <div class="category-header"><i class="bi bi-activity me-2"></i>Physical Generals</div>
+                            <div class="row row-cols-2 row-cols-md-4 g-3">
+                                {% set physicals = [
+                                    ('Appetite', visit.appetite), ('Thirst', visit.thirst), 
+                                    ('Tongue', visit.tongue), ('Salivation', visit.salivation),
+                                    ('Taste', visit.taste), ('Desire', visit.desire),
+                                    ('Aversion', visit.aversion), ('Intolerance', visit.intolerance),
+                                    ('Stool', visit.stool), ('Urine', visit.urine),
+                                    ('Perspiration', visit.perspiration), ('Discharge', visit.discharge),
+                                    ('Thermal', visit.thermal)
+                                ] %}
+                                {% for label, value in physicals %}
+                                <div>
+                                    <span class="data-label">{{ label }}</span>
+                                    <span class="data-value">{{ value or '-' }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <div class="category-header"><i class="bi bi-droplet me-2"></i>Menstruation</div>
+                            <div class="row row-cols-2 row-cols-md-4 g-3">
+                                <div><span class="data-label">Cycle</span><span class="data-value">{{ visit.m_cycle or '-' }}</span></div>
+                                <div><span class="data-label">Flow</span><span class="data-value">{{ visit.m_flow or '-' }}</span></div>
+                                <div><span class="data-label">Color</span><span class="data-value">{{ visit.m_color or '-' }}</span></div>
+                                <div><span class="data-label">Timing</span><span class="data-value">{{ visit.m_timing or '-' }}</span></div>
+                                <div><span class="data-label">Leucorrhoea</span><span class="data-value">{{ visit.leucorrhoea or '-' }}</span></div>
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="category-header"><i class="bi bi-activity me-2"></i>Modalities</div>
+                            <div class="row row-cols-2 row-cols-md-4 g-3">
+                                <div><span class="data-label">Fear</span><span class="data-value">{{ visit.fear or '-' }}</span></div>
+                                <div><span class="data-label">Air Preference</span><span class="data-value">{{ visit.air_pref or '-' }}</span></div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="detail-section">
+                            <label class="data-label mb-2">Prescription</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% if visit.medicines_given %}
+                                    {% for med in visit.medicines_given.split(',') %}
+                                        <span class="med-pill shadow-sm"><i class="bi bi-capsule me-1"></i>{{ med.strip() }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted small">No medicines prescribed.</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if visit.notes %}
+                        <div class="mt-3 p-3 bg-warning bg-opacity-10 rounded-3 border-start border-3 border-warning">
+                            <span class="data-label text-warning-emphasis">Clinical Notes</span>
+                            <p class="small mb-0 text-dark">{{ visit.notes }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5 visit-card shadow-sm border-dashed">
+                <i class="bi bi-folder2-open display-4 text-muted"></i>
+                <p class="mt-3 text-muted">No visits found for this patient.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 text-center">
+                <img src="" id="modalImage" class="img-fluid rounded shadow-lg" alt="Zoomed Clinical Photo">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function openImageModal(src) {
+        document.getElementById('modalImage').src = src;
+        var myModal = new bootstrap.Modal(document.getElementById('imageModal'));
+        myModal.show();
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --followup-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+  .soft-card {
+    background: var(--glass-bg);
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  }
+  .form-label { font-weight: 600; font-size: 0.85rem; color: #47694a; margin-bottom: 0.4rem; }
+    .form-control, .form-select {
+    border-radius: 0.75rem;
+    padding: 0.625rem 1rem;
+    border: 1px solid #e2f0e8;
+    background-color: #fcfdfc;
+    transition: all 0.2s ease;
+  }
+
+  .form-control:focus {
+    box-shadow: 0 0 0 4px rgba(99, 241, 144, 0.1);
+    border-color: #006d0f;
+  }
+  .btn-followup {
+    background: var(--followup-gradient);
+    color: white; border: none; border-radius: 0.75rem;
+    padding: 0.8rem; font-weight: 600;
+  }
+  .patient-mini-card {
+    background: #f8fafc;
+    border-radius: 1rem;
+    padding: 1rem;
+    border-left: 4px solid #006d0f;
+  }
+</style>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card soft-card border-0">
+        <div class="card-body p-4 p-md-5">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold m-0 text-success">New Follow-up Visit</h4>
+            <a href="{{ url_for('patients.patient_history', patient_id=patient.id) }}" class="btn-close"></a>
+          </div>
+
+          <div class="patient-mini-card mb-4">
+            <div class="row">
+              <div class="col-md-6">
+                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Patient</small>
+                <span class="fw-bold text-dark">{{ patient.name }} ({{ patient.card_id }})</span>
+              </div>
+              <div class="col-md-6 text-md-end">
+                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Date</small>
+                <span class="fw-bold text-dark">{{ current_date }}</span>
+              </div>
+            </div>
+          </div>
+
+          <form method="POST" enctype="multipart/form-data">
+            <div class="row g-4">
+              <div class="col-12">
+                <label class="form-label fw-bold">Presenting Symptoms (Current)</label>
+                <textarea name="symptoms" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-bold">Prescribed Medicines</label>
+                <textarea name="medicines" class="form-control" rows="3"></textarea>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label fw-bold">Clinical Notes</label>
+                <textarea name="notes" class="form-control" rows="2"></textarea>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold">Update Photo</label>
+                <input type="file" name="photo" class="form-control" accept="image/*">
+              </div>
+            </div>
+
+            <div class="mt-5">
+              <button type="submit" class="btn btn-followup w-100 shadow-sm">
+                <i class="bi bi-plus-circle me-2"></i> Save Follow-up Record
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

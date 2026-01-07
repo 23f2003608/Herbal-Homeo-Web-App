@@ -1,0 +1,658 @@
+{% extends "base.html" %}
+{% set hide_navbar = True %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-green: #059669; /* Emerald 600 */
+        --dark-forest: #064e3b;
+        --mint-cream: #f0fdfa;
+        --soft-white: #ffffff;
+        --slate-text: #1e293b;
+        --glass: rgba(255, 255, 255, 0.7);
+        --light-green: #ecfdf3;
+    }
+    
+    body { 
+        font-family: 'Plus Jakarta Sans', sans-serif; 
+        color: var(--slate-text); 
+        background-color: var(--soft-white);
+        overflow-x: hidden; 
+    }
+
+    h1, h2, .serif-font { font-family: 'Fraunces', serif; }
+
+    /* --- BEAUTIFIED SCROLLBAR --- */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--mint-cream); }
+    ::-webkit-scrollbar-thumb { background: var(--primary-green); border-radius: 10px; }
+
+    /* --- GLASS NAVIGATION --- */
+    .glass-nav {
+        background: var(--glass);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(5, 150, 105, 0.1);
+        z-index: 1100;
+        transition: all 0.3s ease;
+    }
+
+    /* --- HERO SECTION --- */
+    .hero-section {
+        background: linear-gradient(135deg, #f0fdfa 0%, #ffffff 100%);
+        padding: 150px 0 90px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-title {
+        font-size: clamp(2.4rem, 7vw, 5rem);
+        font-weight: 700;
+        line-height: 1.05;
+        color: var(--dark-forest);
+        word-break: break-word;
+    }
+
+    .floating-blob {
+        position: absolute;
+        width: 320px;
+        height: 320px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
+        z-index: 0;
+        filter: blur(40px);
+        pointer-events: none;
+    }
+
+    /* --- LIGHT, NECESSARY HERO ANIMATIONS ONLY --- */
+    .fade-up {
+        opacity: 0;
+        transform: translate3d(0, 14px, 0);
+        animation: fadeUp 700ms ease-out forwards;
+        will-change: transform, opacity;
+    }
+    .delay-1 { animation-delay: 120ms; }
+    .delay-2 { animation-delay: 220ms; }
+    .delay-3 { animation-delay: 320ms; }
+
+    @keyframes fadeUp {
+        to { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+
+    /* --- BENTO SERVICE CARDS --- */
+    .bento-card {
+        background: white;
+        border-radius: 24px;
+        padding: 2rem;
+        border: 1px solid rgba(0,0,0,0.06);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        cursor: pointer;
+    }
+    .bento-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 22px 45px rgba(6, 78, 59, 0.10);
+        border-color: rgba(5,150,105,0.45);
+    }
+
+    /* --- MODERN STEP INDICATOR --- */
+    .step-circle {
+        width: 50px; height: 50px;
+        background: var(--primary-green);
+        color: white;
+        border-radius: 15px;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 18px rgba(5, 150, 105, 0.18);
+    }
+
+    /* --- DOCTOR PROFILE --- */
+    .doctor-wrap { background: var(--light-green); border-radius: 40px; overflow: hidden; }
+    .doc-img { height: 100%; max-height: 600px; object-fit: cover; width: 100%; display: block; }
+    .stat-box { background: white; padding: 20px; border-radius: 25px; text-align: center; min-width: 120px; }
+
+    /* --- TIMETABLE --- */
+    .time-card {
+        background: white; 
+        border: 1px solid #e2e8f0; 
+        border-radius: 30px;
+        padding: 26px; 
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .time-card:hover { 
+        border-color: rgba(5,150,105,0.5); 
+        transform: translateY(-6px);
+        box-shadow: 0 18px 34px rgba(0,0,0,0.07);
+    }
+
+    /* --- CTA BUTTONS --- */
+    .btn-zen {
+        background: var(--primary-green);
+        color: white;
+        padding: 12px 26px;
+        border-radius: 100px;
+        font-weight: 600;
+        border: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        box-shadow: 0 10px 22px rgba(5, 150, 105, 0.25);
+    }
+    .btn-zen:hover {
+        background: var(--dark-forest);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 14px 26px rgba(5, 150, 105, 0.30);
+    }
+
+    /* --- TESTIMONIALS --- */
+    .quote-icon {
+        font-size: 3rem;
+        color: var(--primary-green);
+        opacity: 0.15;
+        position: absolute;
+        top: 20px; right: 30px;
+        pointer-events: none;
+    }
+
+    /* Smooth background for the whole section */
+    #testimonials {
+        background-image: radial-gradient(#05966908 1px, transparent 1px);
+        background-size: 30px 30px;
+    }
+
+    /* --- ENHANCED NANO ANNOUNCER --- */
+    .nano-announcer {
+        background: #ffffff;
+        border-bottom: 1px solid rgba(5, 150, 105, 0.1);
+        height: 48px;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nano-announcer::before,
+    .nano-announcer::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        width: 90px;
+        height: 100%;
+        z-index: 2;
+        pointer-events: none;
+    }
+    .nano-announcer::before {
+        left: 0;
+        background: linear-gradient(to right, white, transparent);
+    }
+    .nano-announcer::after {
+        right: 0;
+        background: linear-gradient(to left, white, transparent);
+    }
+
+    .ticker-badge {
+        font-size: 11px;
+        font-weight: 800;
+        background: var(--dark-forest);
+        color: #fff;
+        padding: 4px 12px;
+        border-radius: 6px;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-right: 18px;
+        z-index: 3;
+        flex-shrink: 0;
+    }
+
+    .ticker-track {
+        display: flex;
+        white-space: nowrap;
+        animation: marquee 40s linear infinite;
+        will-change: transform;
+    }
+
+    .ticker-track:hover {
+        animation-play-state: paused;
+        cursor: grab;
+    }
+
+    .ticker-item {
+        font-size: 14px;
+        color: var(--slate-text);
+        display: flex;
+        align-items: center;
+        padding: 0 34px;
+    }
+
+    .t-cat {
+        font-weight: 800;
+        color: var(--primary-green);
+        background: rgba(5, 150, 105, 0.08);
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-right: 10px;
+        font-size: 11px;
+        flex-shrink: 0;
+    }
+
+    .t-msg { font-weight: 500; letter-spacing: -0.2px; }
+
+    .ticker-separator {
+        color: #cbd5e1;
+        font-size: 20px;
+        margin-left: 34px;
+    }
+
+    @keyframes marquee {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+
+    /* --- TREATMENTS --- */
+    .treatment-card {
+        background: #f8fafc; 
+        border-radius: 34px; 
+        padding: 28px;
+        border: 1px solid rgba(0,0,0,0.05); 
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease; 
+        cursor: pointer; 
+        height: 100%;
+    }
+    .treatment-card:hover {
+        background: white; 
+        border-color: rgba(5,150,105,0.45);
+        transform: translateY(-6px); 
+        box-shadow: 0 24px 46px rgba(16, 185, 129, 0.10);
+    }
+    .treatment-card i { font-size: 2.4rem; color: var(--primary-green); margin-bottom: 16px; display: block; }
+
+    /* --- RESPONSIVE FIXES --- */
+    @media (max-width: 991.98px) {
+        .hero-section { padding: 120px 0 70px; }
+        nav.glass-nav .container { flex-wrap: wrap; row-gap: 10px; }
+        .doc-img { max-height: 520px; }
+        .ticker-item { padding: 0 22px; }
+    }
+
+    @media (max-width: 767.98px) {
+        .hero-section { padding-top: 115px; }
+        .floating-blob { width: 220px; height: 220px; right: -10%; top: -5%; }
+        .btn-zen { width: 100%; display: inline-flex; justify-content: center; }
+        .ticker-badge { display: none; }
+        .ticker-track { animation-duration: 55s; }
+        .doctor-wrap { border-radius: 24px; }
+        footer { border-radius: 32px 32px 0 0 !important; }
+    }
+
+    @media (max-width: 575.98px) {
+        .stat-box { min-width: 100px; padding: 16px; }
+        .btn-zen.position-fixed { width: 52px !important; height: 52px !important; }
+        .quote-icon { top: 18px; right: 18px; font-size: 3.5rem; opacity: 0.08; }
+    }
+
+    /* Accessibility + performance: reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+            scroll-behavior: auto !important;
+        }
+        .ticker-track { animation: none !important; transform: none !important; }
+    }
+</style>
+
+<nav class="glass-nav sticky-top py-3">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a href="/" class="d-flex align-items-center text-decoration-none">
+            <div class="bg-success p-2 rounded-circle me-2 text-white shadow-sm">
+                <i class="bi bi-flower1"></i>
+            </div>
+            <span class="h4 mb-0 fw-extrabold text-dark tracking-tighter">Herbal<span class="text-success">Homeo</span></span>
+        </a>
+        <div class="d-flex gap-4 align-items-center">
+            <a href="#process" class="nav-link fw-semibold small text-dark">Methodology</a>
+            <a href="#testimonials" class="nav-link fw-semibold small text-dark">Success Stories</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-success rounded-pill px-4 btn-sm fw-bold">Practitioner Login</a>
+        </div>
+    </div>
+</nav>
+
+{% if active_notices %}
+<div class="nano-announcer">
+    <div class="container-fluid d-flex align-items-center">
+        <div class="ticker-badge">
+            LATEST UPDATES
+        </div>
+        <div class="ticker-track">
+            {% for notice in active_notices %}
+            <div class="ticker-item">
+                <span class="t-cat">{{ notice.category }}</span>
+                <span class="t-msg text-muted">{{ notice.content }}</span>
+                <span class="ticker-separator">•</span>
+            </div>
+            {% endfor %}
+
+            {% for notice in active_notices %}
+            <div class="ticker-item">
+                <span class="t-cat">{{ notice.category }}</span>
+                <span class="t-msg text-muted">{{ notice.content }}</span>
+                <span class="ticker-separator">•</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<section class="hero-section">
+    <div class="floating-blob" style="top: 10%; right: 10%;"></div>
+
+    <div class="container" style="position: relative; z-index: 1;">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <span class="badge rounded-pill bg-success bg-opacity-10 text-success px-4 py-2 mb-4 fw-bold fade-up">
+                    ✨ Welcome to the Future of Homeopathy
+                </span>
+
+                <h1 class="hero-title mb-4 fade-up delay-1">True Health <br><span class="text-success italic">Rooted</span> in Nature.</h1>
+
+                <p class="lead text-muted mb-4 fs-5 fade-up delay-2">
+                    Experience constitutional healing that aligns with your body's biological rhythm. Modern science meets ancient botanical wisdom.
+                </p>
+
+                <div class="d-flex flex-wrap gap-3 fade-up delay-3">
+                    <button class="btn btn-zen">Book Free Assessment</button>
+                    <button class="btn btn-light rounded-pill px-4 fw-bold border">View Treatments</button>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mt-5 mt-lg-0 position-relative fade-up delay-2">
+                <div class="p-2 bg-white rounded-5 shadow-2xl">
+                    <img src="static/header.jpg" class="img-fluid rounded-5" alt="Medical Lab">
+                </div>
+
+                <div class="position-absolute bg-white p-3 rounded-4 shadow-lg" style="bottom: 20px; left: -20px; max-width: 200px;">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-success rounded-circle p-2 text-white"><i class="bi bi-star-fill"></i></div>
+                        <div>
+                            <div class="fw-bold small">4.9/5 Rating</div>
+                            <div class="text-muted" style="font-size: 10px;">From 1,200+ Recoveries</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-white border-bottom">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-6 col-md-3">
+                <h3 class="fw-bold mb-0">15k+</h3>
+                <small class="text-muted text-uppercase fw-bold">Patients Healed</small>
+            </div>
+            <div class="col-6 col-md-3 border-start">
+                <h3 class="fw-bold mb-0">98%</h3>
+                <small class="text-muted text-uppercase fw-bold">Success Rate</small>
+            </div>
+            <div class="col-6 col-md-3 border-start">
+                <h3 class="fw-bold mb-0">20+</h3>
+                <small class="text-muted text-uppercase fw-bold">Global Awards</small>
+            </div>
+            <div class="col-6 col-md-3 border-start">
+                <h3 class="fw-bold mb-0">ISO</h3>
+                <small class="text-muted text-uppercase fw-bold">9001 Certified</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3-STEP PROTOCOL: NO ANIMATIONS (as requested) -->
+<section id="process" class="py-5" style="background: var(--mint-cream);">
+    <div class="container py-5">
+        <div class="row mb-5 text-center justify-content-center">
+            <div class="col-lg-6">
+                <h2 class="display-4 fw-bold mb-3">Our 3-Step Protocol</h2>
+                <p class="text-muted">A systematic approach to uncovering the root cause of your symptoms.</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="bento-card h-100">
+                    <div class="step-circle">1</div>
+                    <h4 class="fw-bold">Bio-Mapping</h4>
+                    <p class="text-muted">In-depth consultation mapping your genetic, mental, and physical landscape.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bento-card h-100">
+                    <div class="step-circle" style="background: var(--dark-forest);">2</div>
+                    <h4 class="fw-bold">Digital Analysis</h4>
+                    <p class="text-muted">Using AI-driven repertorization to cross-reference 4,000+ homeopathic remedies.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bento-card h-100">
+                    <div class="step-circle">3</div>
+                    <h4 class="fw-bold">Vital Monitoring</h4>
+                    <p class="text-muted">Structured follow-ups to monitor the 'Vital Force' and ensure lasting recovery.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="doctor" class="py-5">
+    <div class="container">
+        <div class="doctor-wrap">
+            <div class="row g-0 align-items-center">
+                <div class="col-lg-6 p-5">
+                    <span class="badge bg-success text-white px-3 py-2 mb-3">CHIEF PHYSICIAN</span>
+                    <h2 class="display-4 fw-bold">Dr. Shikhar Sharma</h2>
+                    <p class="fs-5 opacity-75 mb-5">
+                        With 18+ years of clinical mastery, Dr. Sharma integrates molecular science with classical homeopathy to deliver results where conventional medicine stops.
+                    </p>
+
+                    <div class="d-flex gap-4 flex-wrap">
+                        <div class="stat-box">
+                            <h2 class="fw-bold text-success mb-0">18+</h2>
+                            <small>Years</small>
+                        </div>
+                        <div class="stat-box">
+                            <h2 class="fw-bold text-success mb-0">5,000+</h2>
+                            <small>Cures</small>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-lg-6">
+                    <img src="static/doc.jpeg" class="doc-img rounded-5" alt="Doctor">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="treatments" class="py-5 bg-light">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="display-3 fw-bold">Advanced Programs</h2>
+            <p class="text-muted">Digital diagnostics meets natural cure.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="treatment-card">
+                    <i class="bi bi-dna"></i>
+                    <h3 class="fw-bold">Chronic Reversal</h3>
+                    <p>DNA-based protocols for long-term ailments and autoimmune conditions.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="treatment-card">
+                    <i class="bi bi-wind"></i>
+                    <h3 class="fw-bold">Respiratory Care</h3>
+                    <p>Advanced treatment for chronic asthma, allergies, and lung vitality.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="treatment-card">
+                    <i class="bi bi-shield-check"></i>
+                    <h3 class="fw-bold">Immuno-Boost</h3>
+                    <p>Strengthening the body's internal pharmacy to prevent seasonal illness.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="timetable" class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6">
+                <h2 class="display-4 fw-bold mb-0">Clinic <span class="text-success">Hours</span></h2>
+                <p class="text-muted">Plan your visit or schedule a virtual consultation.</p>
+            </div>
+            <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
+                <span class="badge rounded-pill px-4 py-2 border text-dark fw-bold" style="background: var(--mint-cream);">
+                    <span class="spinner-grow spinner-grow-sm text-success me-2"></span> Accepting New Patients
+                </span>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="time-card h-100 p-4 shadow-sm border-0 position-relative overflow-hidden">
+                    <span class="badge bg-success mb-3">Weekday</span>
+                    <h4 class="fw-bold mb-1">Mon — Wed</h4>
+                    <div class="d-flex align-items-baseline gap-2 mb-3">
+                        <span class="h2 fw-800 mb-0">09:00</span>
+                        <span class="text-muted fw-bold">AM</span>
+                        <span class="mx-1 text-muted">—</span>
+                        <span class="h2 fw-800 mb-0">07:00</span>
+                        <span class="text-muted fw-bold">PM</span>
+                    </div>
+                    <ul class="list-unstyled small text-muted mb-0">
+                        <li><i class="bi bi-check2-circle text-success me-2"></i>Video Consultations</li>
+                        <li><i class="bi bi-check2-circle text-success me-2"></i>Home Delivery Service</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="time-card h-100 p-4 shadow-sm border-0 bg-dark text-white position-relative">
+                    <span class="badge bg-primary mb-3">Active Hours</span>
+                    <h4 class="fw-bold mb-1">Thu — Sat</h4>
+                    <div class="d-flex align-items-baseline gap-2 mb-3">
+                        <span class="h2 fw-800 mb-0 text-white">10:00</span>
+                        <span class="opacity-50 fw-bold">AM</span>
+                        <span class="mx-1 opacity-50">—</span>
+                        <span class="h2 fw-800 mb-0 text-white">08:00</span>
+                        <span class="opacity-50 fw-bold">PM</span>
+                    </div>
+                    <p class="small opacity-75 mb-0"><i class="bi bi-geo-alt me-2"></i>In-person clinic sessions only. Priority for chronic cases.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="time-card h-100 p-4 border shadow-sm">
+                    <span class="badge bg-danger bg-opacity-10 text-danger mb-3">Rest Day</span>
+                    <h4 class="fw-bold mb-1">Sunday</h4>
+                    <p class="display-6 fw-bold text-muted mb-3">Closed</p>
+                    <div class="p-3 rounded-3 bg-light border-start border-4 border-danger">
+                        <p class="small mb-0 fw-bold text-dark">Emergency?</p>
+                        <p class="small text-muted mb-0">WhatsApp "URGENT" to our helpline.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="testimonials" class="py-5" style="background: #fcfdfd;">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="serif-font display-4">Healing <span class="italic">Voices</span></h2>
+            <p class="text-muted lead">Real stories from people who chose the natural path.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="p-5 rounded-5 bg-white border shadow-sm h-100 d-flex flex-column justify-content-center position-relative">
+                    <div class="quote-icon"><i class="bi bi-quote"></i></div>
+                    <div class="d-flex gap-1 text-warning mb-4">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <h3 class="serif-font mb-4">"After 5 years of Migraines, I finally found a permanent solution that didn't involve heavy painkillers."</h3>
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="https://i.pravatar.cc/150?u=ananya" class="rounded-circle" width="60" height="60" alt="Patient">
+                        <div>
+                            <h6 class="fw-bold mb-0">Ananya Iyer</h6>
+                            <small class="text-success fw-bold"><i class="bi bi-patch-check-fill"></i> Verified Recovery</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="d-flex flex-column gap-4">
+                    <div class="p-4 rounded-5 border bg-white shadow-sm">
+                        <p class="mb-3 text-muted">"The best place for child immunity. My son's recurring cold is completely gone now."</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-light rounded-circle p-2 fw-bold text-success">
+                                <img src="https://randomuser.me/api/portraits/men/76.jpg" class="rounded-circle" width="60" height="60" alt="Patient">
+                            </div>
+                            <h6 class="fw-bold mb-0 small">Rajesh Verma <span class="fw-normal text-muted ms-2">Parent</span></h6>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 rounded-5 border bg-white shadow-sm">
+                        <p class="mb-3 text-muted">"Incredible approach to thyroid management. Professional and deeply empathetic."</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-light rounded-circle p-2 fw-bold text-success">
+                                <img src="https://randomuser.me/api/portraits/men/37.jpg" class="rounded-circle" width="60" height="60" alt="Patient">
+                            </div>
+                            <h6 class="fw-bold mb-0 small">Priya Sharma <span class="fw-normal text-muted ms-2">IT Professional</span></h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="bg-dark text-white pt-5 mt-5" style="border-radius: 60px 60px 0 0;">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-lg-4">
+                <h3 class="serif-font mb-4 text-success">Herbal Homeo</h3>
+                <p class="opacity-50">Leading the way in evidence-based homeopathy and botanical medicine. Your health is our legacy.</p>
+            </div>
+            <div class="col-lg-4">
+                <h6 class="fw-bold text-uppercase mb-4">Location</h6>
+                <p class="opacity-50"><i class="bi bi-geo-alt-fill me-2"></i> Sector 15, New Delhi, India</p>
+                <p class="opacity-50"><i class="bi bi-envelope-paper-fill me-2"></i> support@herbalhomeo.com</p>
+            </div>
+            <div class="col-lg-4">
+                <h6 class="fw-bold text-uppercase mb-4">Stay Connected</h6>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-white fs-4 opacity-50"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-white fs-4 opacity-50"><i class="bi bi-whatsapp"></i></a>
+                    <a href="#" class="text-white fs-4 opacity-50"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <hr class="my-5 opacity-10">
+        <p class="text-center opacity-25 pb-3">© 2025 Herbal Homeo Clinic. All Rights Reserved.</p>
+    </div>
+</footer>
+
+<a href="tel:+919876543210" class="btn btn-zen position-fixed bottom-0 end-0 m-4 p-3 rounded-circle shadow-lg" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; z-index: 1000;">
+    <i class="bi bi-telephone-fill fs-4"></i>
+</a>
+
+{% endblock %}
