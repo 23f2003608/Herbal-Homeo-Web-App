@@ -11,7 +11,7 @@ A Flask-based web application built for **Herbal Homeo**, a local homeopathic cl
 * **Expense Tracking:** Monitor clinic expenditures.
 * **Notices & Updates:** Post important clinic updates on the dashboard.
 * **Dashboard Overview:** Get a quick glance at clinic stats.
-* **PDF Support:** Generation support for reports/prescriptions.
+* **Password Set:** Run seed_doctor.py.
 * **Responsive UI:** Clean interface built with modern templates and assets.
 
 ---
@@ -85,7 +85,9 @@ SECRET_KEY=your_secret_key_here
 DATABASE_URL=sqlite:///app.db
 
 ```
-
+---
+View project video: [VIEW HERE](https://drive.google.com/file/d/1QMimdaV6K92-S75TmggLfdgTjCh6jxP0/view?usp=sharing)
+---
 ### 5. Run the Application
 
 ```bash
