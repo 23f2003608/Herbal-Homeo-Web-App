@@ -9,8 +9,41 @@ from ..models import db, Patient, Visit
 from flask import render_template, make_response
 from io import BytesIO
 import pdfkit
+from PIL import Image
 
 patients_bp = Blueprint("patients", __name__, url_prefix="/patients")
+
+
+def compress_and_save_image(photo_file, output_path):
+    """Compress user-uploaded image and save in an optimized format."""
+    try:
+        photo_file.stream.seek(0)
+        image = Image.open(photo_file.stream)
+        image_format = image.format or "JPEG"
+
+        if image_format.upper() == "PNG":
+            if image.mode not in ("RGBA", "RGB"):
+                image = image.convert("RGBA")
+        else:
+            if image.mode != "RGB":
+                image = image.convert("RGB")
+
+        image.thumbnail((1200, 1200), Image.LANCZOS)
+
+        save_kwargs = {"optimize": True}
+        if image_format.upper() in ("JPEG", "JPG"):
+            save_kwargs.update({"quality": 80, "progressive": True})
+            image.save(output_path, format="JPEG", **save_kwargs)
+        elif image_format.upper() == "PNG":
+            save_kwargs.update({"compress_level": 6})
+            image.save(output_path, format="PNG", **save_kwargs)
+        else:
+            save_kwargs.update({"quality": 80, "progressive": True})
+            image.save(output_path, format="JPEG", **save_kwargs)
+    except Exception:
+        photo_file.stream.seek(0)
+        photo_file.save(output_path)
+
 
 def generate_patient_id():
     last_patient = Patient.query.order_by(Patient.id.desc()).first()
@@ -54,8 +87,8 @@ def new_appointment():
         if photo_file and photo_file.filename:
             filename = secure_filename(photo_file.filename)
             file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], f"{datetime.now().timestamp()}_{filename}")
-            photo_file.save(file_path)
-            photo_path = file_path.split("app/static/")[-1]
+            compress_and_save_image(photo_file, file_path)
+            photo_path = os.path.relpath(file_path, os.path.join(current_app.root_path, "static")).replace(os.sep, "/")
 
         # 3. Create Visit with Physical Generals
         visit = Visit(
@@ -178,8 +211,8 @@ def new_followup(patient_id):
         if photo_file and photo_file.filename:
             filename = secure_filename(photo_file.filename)
             file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], f"{datetime.now().timestamp()}_{filename}")
-            photo_file.save(file_path)
-            photo_path = file_path.split("app/static/")[-1]
+            compress_and_save_image(photo_file, file_path)
+            photo_path = os.path.relpath(file_path, os.path.join(current_app.root_path, "static")).replace(os.sep, "/")
 
         visit = Visit(
             patient_id=patient.id,

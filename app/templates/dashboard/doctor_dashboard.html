@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 <style>
     :root {
@@ -30,6 +29,20 @@
         <div class="col-md-5">
             <h2 class="fw-bold text-success text-uppercase mb-1">Clinic Analytics</h2>
             <p class="text-muted">Overview for {{ datetime(selected_year, selected_month, 1).strftime('%B %Y') }}</p>
+            <div class="alert alert-success py-3 px-4 rounded-4 shadow-sm mt-3 mb-0">
+                <div class="d-flex flex-column flex-md-row justify-content-between gap-2 align-items-start align-items-md-center">
+                    <div>
+                        <strong>Local access:</strong>
+                        {% if network_url %}
+                        Your clinic server is available on Wi-Fi at
+                        <a href="{{ network_url }}" class="fw-bold text-decoration-underline">{{ network_url }}</a>
+                        {% else %}
+                        Open it locally at <span class="fw-bold">{{ local_url }}</span>. Connect the device to Wi-Fi to share it.
+                        {% endif %}
+                    </div>
+                    <small class="text-muted">Copy this URL into a browser on another device on the same network.</small>
+                </div>
+            </div>
         </div>
         <div class="col-md-7">
             <form method="GET" class="d-flex gap-2 justify-content-md-end align-items-center">
@@ -134,7 +147,7 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='vendor/js/chart.min.js') }}"></script>
 <script>
     // 1. Growth Trend Chart
     new Chart(document.getElementById('growthChart'), {

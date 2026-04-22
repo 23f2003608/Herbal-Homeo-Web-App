@@ -99,6 +99,22 @@ python run.py
 
 App will be live at: **http://127.0.0.1:3000**
 
+### 6. Portable External Drive Usage
+
+This application is configured to run from any folder or removable drive without changing code.
+
+- Copy the full project folder to the target drive.
+- The database file `herbal_homeo.db` is stored in the app folder.
+- Uploaded images are saved under `app/static/uploads/`.
+- Copying the entire folder migrates the app and its data together.
+
+#### Windows launcher for non-technical users
+
+- Double-click `launch_app.vbs` to start the app with no terminal window.
+- On first run, it creates a local `venv` and installs dependencies automatically.
+- Once started, use `http://127.0.0.1:3000` in the browser.
+- If the PC is on Wi-Fi, the dashboard will also display a second network URL such as `http://<local-ip>:3000` for other devices.
+
 ---
 
 ## 🚫 Ignored Files
